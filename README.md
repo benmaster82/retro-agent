@@ -1,5 +1,12 @@
 # micro-agent
 
+[![platform](https://img.shields.io/badge/platform-Windows%20XP%20SP3-blue)](https://github.com/benmaster82/retro-agent)
+[![arch](https://img.shields.io/badge/arch-x86%20(32--bit)-orange)](https://github.com/benmaster82/retro-agent)
+[![language](https://img.shields.io/badge/language-Zig%200.15.2-yellow)](https://ziglang.org/)
+[![LLM](https://img.shields.io/badge/LLM-Ollama-green)](https://ollama.com/)
+[![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![release](https://img.shields.io/github/v/release/benmaster82/retro-agent)](https://github.com/benmaster82/retro-agent/releases)
+
 A terminal-based AI agent written in Zig, designed to run on legacy hardware — including Windows XP SP3 x86 with as little as 64 MB RAM.
 
 Communicates with [Ollama](https://ollama.com/) or any OpenAI-compatible API over local HTTP. Supports function calling (tool use) and provides a colored TUI using Win32 Console API with CP437 box-drawing characters.
