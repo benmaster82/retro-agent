@@ -1,27 +1,27 @@
-# Compilazione per Windows XP
+# Building for Windows XP
 
-Questa guida spiega come compilare `micro-agent` per Windows XP (32-bit) con Zig 0.15.2.
+This guide explains how to compile `micro-agent` for Windows XP (32-bit) with Zig 0.15.2.
 
-## Requisiti
+## Requirements
 
-- Zig 0.15.2 o superiore
-- Sistema operativo: Windows, Linux o macOS (per la cross-compilation)
+- Zig 0.15.2 or later
+- Host OS: Windows, Linux, or macOS (for cross-compilation)
 
-## Metodi di Compilazione
+## Build Methods
 
-### Metodo 1: Build System Dedicato (Consigliato)
+### Method 1: Dedicated Build System (Recommended)
 
-Usa il file `build-xp.zig` che configura automaticamente tutti i parametri per XP:
+Use the `build-xp.zig` file which automatically configures all XP parameters:
 
 ```bash
 zig build --build-file build-xp.zig --prefix xp-build
 ```
 
-Il binario sarà disponibile in: `xp-build/bin/agentxp.exe`
+The binary will be available at: `xp-build/bin/agentxp.exe`
 
-### Metodo 2: Compilazione Diretta
+### Method 2: Direct Compilation
 
-Compila direttamente specificando tutti i parametri:
+Compile directly specifying all parameters:
 
 ```bash
 zig build-exe src/main.zig \
@@ -32,41 +32,41 @@ zig build-exe src/main.zig \
   --name agentxp
 ```
 
-### Metodo 3: Build System Principale
+### Method 3: Main Build System
 
-Usa il build system principale con target specifico:
+Use the main build system with a specific target:
 
 ```bash
 zig build -Dtarget=x86-windows-gnu -Doptimize=ReleaseSmall --prefix xp-build
 ```
 
-## Parametri di Compilazione
+## Build Parameters
 
-| Parametro | Valore | Descrizione |
-|-----------|--------|-------------|
-| `-target` | `x86-windows-gnu` | Target Windows XP 32-bit con ABI GNU |
-| `-O` | `ReleaseSmall` | Ottimizzazione per dimensione minima |
-| `-fstrip` | - | Rimuove simboli di debug |
-| `-fsingle-threaded` | - | Disabilita threading (riduce dipendenze) |
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `-target` | `x86-windows-gnu` | Windows XP 32-bit target with GNU ABI |
+| `-O` | `ReleaseSmall` | Optimize for minimum size |
+| `-fstrip` | - | Remove debug symbols |
+| `-fsingle-threaded` | - | Disable threading (reduces dependencies) |
 | `--stack` | `16777216` | Stack size 16 MB |
-| `os_version_min` | `.xp` | Versione minima Windows XP |
+| `os_version_min` | `.xp` | Minimum version: Windows XP |
 
-## Caratteristiche del Binario
+## Binary Characteristics
 
-- **Dimensione**: ~750 KB
-- **Dipendenze**: Nessuna (staticamente linkato)
-- **Compatibilità**: Windows XP SP3+ (32-bit)
-- **RAM minima**: 64 MB
-- **CPU minima**: Pentium III o superiore
+- **Size**: ~750 KB
+- **Dependencies**: None (statically linked)
+- **Compatibility**: Windows XP SP3+ (32-bit)
+- **Minimum RAM**: 64 MB
+- **Minimum CPU**: Pentium III or later
 
-## Compatibilità API
+## API Compatibility
 
-Il binario include shim per API moderne non disponibili su XP:
+The binary includes shims for modern APIs not available on XP:
 
 ### RtlGetSystemTimePrecise
 ```zig
-// Disponibile solo da Windows 8+
-// Fallback automatico a GetSystemTimeAsFileTime su XP
+// Only available from Windows 8+
+// Automatic fallback to GetSystemTimeAsFileTime on XP
 fn RtlGetSystemTimePrecise() callconv(.winapi) i64 {
     var ft: FILETIME = undefined;
     kernel32.GetSystemTimeAsFileTime(&ft);
@@ -74,17 +74,17 @@ fn RtlGetSystemTimePrecise() callconv(.winapi) i64 {
 }
 ```
 
-## Limitazioni su Windows XP
+## Windows XP Limitations
 
 ### TLS/HTTPS
-Windows XP non supporta TLS 1.2+ richiesto dalla maggior parte delle API moderne.
+Windows XP does not support TLS 1.2+ required by most modern APIs.
 
-**Soluzioni:**
-1. Usa un proxy locale (es. stunnel, nginx) che gestisce TLS
-2. Configura `base_url` HTTP se il provider lo supporta
-3. Usa modalità `bridge` o `offline` per comunicare tramite un device moderno
+**Workarounds:**
+1. Use a local proxy (e.g. stunnel, nginx) to handle TLS
+2. Set `base_url` to HTTP if the provider supports it
+3. Use `bridge` or `offline` mode to communicate through a modern device
 
-Esempio configurazione con proxy locale:
+Example configuration with local proxy:
 ```json
 {
   "transport": {
@@ -97,81 +97,81 @@ Esempio configurazione con proxy locale:
 }
 ```
 
-### Memoria
-XP ha limiti di memoria per processo (2 GB su 32-bit). Il binario è ottimizzato per:
+### Memory
+XP has per-process memory limits (2 GB on 32-bit). The binary is optimized for:
 - Stack: 16 MB
-- Heap: allocazione dinamica minimale
-- Buffer: dimensioni fisse per evitare frammentazione
+- Heap: minimal dynamic allocation
+- Buffers: fixed sizes to avoid fragmentation
 
-## Test su Windows XP
+## Testing on Windows XP
 
-### Opzione 1: Macchina Fisica
-1. Copia `agentxp.exe` su una macchina Windows XP reale
-2. Esegui da cmd.exe: `agentxp.exe --version`
+### Option 1: Physical Machine
+1. Copy `agentxp.exe` to a real Windows XP machine
+2. Run from cmd.exe: `agentxp.exe --version`
 
-### Opzione 2: Macchina Virtuale
-1. Installa VirtualBox o VMware
-2. Crea VM con Windows XP SP3
-3. Condividi cartella o trasferisci via rete
-4. Esegui il binario
+### Option 2: Virtual Machine
+1. Install VirtualBox or VMware
+2. Create a VM with Windows XP SP3
+3. Share a folder or transfer via network
+4. Run the binary
 
-### Opzione 3: Wine (Linux)
+### Option 3: Wine (Linux)
 ```bash
-# Installa Wine 32-bit
+# Install Wine 32-bit
 sudo dpkg --add-architecture i386
 sudo apt update
 sudo apt install wine32
 
-# Esegui il binario
+# Run the binary
 wine agentxp.exe --version
 ```
 
-## Verifica del Binario
+## Verifying the Binary
 
-### Controllo Architettura
+### Architecture Check
 ```bash
-# Su Linux
+# On Linux
 file agentxp.exe
 # Output: PE32 executable (console) Intel 80386, for MS Windows
 
-# Su Windows
+# On Windows
 dumpbin /headers agentxp.exe | findstr machine
 # Output: 14C machine (x86)
 ```
 
-### Test Funzionale
+### Functional Test
 ```bash
-# Test versione
+# Version check
 agentxp.exe --version
 
-# Test help
+# Help
 agentxp.exe --help
 
-# Test modalità interattiva
+# Interactive mode
 agentxp.exe --interactive
 ```
 
-## Risoluzione Problemi
+## Troubleshooting
 
-### "Non è un'applicazione Win32 valida"
-- **Causa**: Stai eseguendo un binario 32-bit su Windows 64-bit senza supporto
-- **Soluzione**: Usa una VM Windows XP 32-bit o abilita WOW64
+### "Not a valid Win32 application"
+- **Cause**: Running a 32-bit binary on 64-bit Windows without support
+- **Fix**: Use a Windows XP 32-bit VM or enable WOW64
 
-### "Punto di ingresso non trovato"
-- **Causa**: API non disponibile su XP
-- **Soluzione**: Ricompila con Zig 0.15.2+ che include gli shim corretti
+### "Entry point not found"
+- **Cause**: API not available on XP
+- **Fix**: Recompile with Zig 0.15.2+ which includes the correct shims
 
-### Crash all'avvio
-- **Causa**: Stack overflow o memoria insufficiente
-- **Soluzione**: Verifica RAM disponibile (minimo 64 MB liberi)
+### Crash on startup
+- **Cause**: Stack overflow or insufficient memory
+- **Fix**: Check available RAM (minimum 64 MB free)
 
-### Errore TLS/HTTPS
-- **Causa**: XP non supporta TLS 1.2+
-- **Soluzione**: Usa proxy locale o modalità offline/bridge
+### TLS/HTTPS error
+- **Cause**: XP does not support TLS 1.2+
+- **Fix**: Use a local proxy or offline/bridge mode
 
-## Build Automatizzata
+## Automated Build
 
-Script per build automatica multi-target:
+Script for automated multi-target build:
 
 ```bash
 #!/bin/bash
@@ -189,10 +189,10 @@ zig build -Dtarget=x86-linux-musl -Doptimize=ReleaseSmall --prefix dist/linux32
 echo "Done! Binaries in dist/"
 ```
 
-## Sicurezza
+## Security
 
-### Validazione Path
-Il binario include whitelist per operazioni file:
+### Path Validation
+The binary supports whitelisting for file operations:
 
 ```json
 {
@@ -205,21 +205,21 @@ Il binario include whitelist per operazioni file:
 ```
 
 ### Sandbox
-Su XP, il sandboxing è limitato. Usa:
-- Account utente con privilegi minimi
-- Cartelle con permessi restrittivi
-- Whitelist rigorose per comandi e path
+On XP, sandboxing is limited. Use:
+- A user account with minimal privileges
+- Folders with restrictive permissions
+- Strict whitelists for commands and paths
 
-## Riferimenti
+## References
 
 - [Zig 0.15.2 Release Notes](https://ziglang.org/download/0.15.2/release-notes.html)
 - [Windows XP API Compatibility](https://learn.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers)
-- [Cross-compilation con Zig](https://ziglang.org/learn/overview/#cross-compiling-is-a-first-class-use-case)
+- [Cross-compilation with Zig](https://ziglang.org/learn/overview/#cross-compiling-is-a-first-class-use-case)
 
-## Supporto
+## Support
 
-Per problemi specifici di Windows XP:
-1. Verifica la versione di Zig (deve essere 0.15.2+)
-2. Controlla i log di compilazione per warning
-3. Testa su VM prima di deployment su hardware legacy
-4. Apri una issue su GitHub con dettagli sistema e log
+For Windows XP specific issues:
+1. Verify Zig version (must be 0.15.2+)
+2. Check build logs for warnings
+3. Test on a VM before deploying to legacy hardware
+4. Open a GitHub issue with system details and logs
